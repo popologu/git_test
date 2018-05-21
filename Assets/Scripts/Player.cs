@@ -8,12 +8,18 @@ public class Player : MonoBehaviour {
 	public float movementSpeed = 4f;
 	public float jumpingSpeed = 6f;
 	public float jumpDuration = 0.35f;
+	public float verticalWallJumpingSpeed = 5f;
+	public float horizontalWallJumpingSpeed = 3.5f;
 
 	private float speed = 0f;
 	private float jumpingTimer = 0f;
 
 	private bool canJump = false;
 	private bool jumping = false;
+	private bool canWallJump = false;
+	private bool wallJumpLeft = false;
+
+	
 
 	// Use this for initialization
 	void Start () {
@@ -53,6 +59,19 @@ public class Player : MonoBehaviour {
 			}
 		}
 
+		if(canWallJump && pressingJumpButton) {
+			canWallJump = false;
+
+			speed = wallJumpLeft ? -horizontalWallJumpingSpeed : horizontalWallJumpingSpeed;
+			
+			GetComponent<Rigidbody>().velocity = new Vector3(
+				GetComponent<Rigidbody>().velocity.x,
+				verticalWallJumpingSpeed,
+				GetComponent<Rigidbody>().velocity.z
+			);
+		}
+
+
 		}
 		
 	void OnTriggerStay(Collider otherCollider) {
@@ -60,6 +79,10 @@ public class Player : MonoBehaviour {
 			canJump = true;
 			jumping = false; // 점핑값을 초기화 시켜주지 않으면 계속 점프함..
 			jumpingTimer = 0f; // 점핑타이머를 초기화 시켜주지 않으면 점프 시간이 계속 증가되서 점프를 안함..위에 조건식 있음.
+		}else if(otherCollider.tag == "WallJumpingArea") {
+			canWallJump = true;
+			wallJumpLeft = transform.position.x < otherCollider.transform.position.x;
+
 		}
 	
 	}
