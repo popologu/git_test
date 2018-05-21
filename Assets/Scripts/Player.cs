@@ -36,7 +36,7 @@ public class Player : MonoBehaviour {
 
 		bool pressingJumpButton = Input.GetMouseButton(0) || Input.GetKey("space");
 		if(pressingJumpButton) {
-			if(!canJump) {
+			if(canJump) {
 				jumping = true;
 			}
 		}
@@ -52,18 +52,17 @@ public class Player : MonoBehaviour {
 			);
 			}
 		}
-			Debug.Log(jumpingTimer);
+
 		}
 		
-		
-	// void OnTriggerStay(Collider otherCollider) {
-	// 	if(otherCollider.tag == "JumpingArea") {
-	// 		canJump = true;
-	// 		jumping = false; // 점핑값을 초기화 시켜주지 않으면 계속 점프함..
-	// 		jumpingTimer = 0f; // 점핑타이머를 초기화 시켜주지 않으면 점프 시간이 계속 증가되서 점프를 안함..위에 조건식 있음.
-	// 	}
+	void OnTriggerStay(Collider otherCollider) {
+		if(otherCollider.tag == "JumpingArea") {
+			canJump = true;
+			jumping = false; // 점핑값을 초기화 시켜주지 않으면 계속 점프함..
+			jumpingTimer = 0f; // 점핑타이머를 초기화 시켜주지 않으면 점프 시간이 계속 증가되서 점프를 안함..위에 조건식 있음.
+		}
 	
-	// }
+	}
 }
 
 	
