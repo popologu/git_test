@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class Player : MonoBehaviour {
 
@@ -11,9 +12,12 @@ public class Player : MonoBehaviour {
 	public float verticalWallJumpingSpeed = 5f;
 	public float horizontalWallJumpingSpeed = 3.5f;
 
+	public Action onCollectCoin;
+
 	private float speed = 0f;
 	private float jumpingTimer = 0f;
 
+	private bool paused = false;
 	private bool canJump = false;
 	private bool jumping = false;
 	private bool canWallJump = false;
@@ -35,7 +39,7 @@ public class Player : MonoBehaviour {
 		}
 
 		GetComponent<Rigidbody>().velocity = new Vector3(
-			speed,
+			paused ? 0 : speed,
 			GetComponent<Rigidbody>().velocity.y,
 			GetComponent<Rigidbody>().velocity.z
 			);
@@ -45,6 +49,10 @@ public class Player : MonoBehaviour {
 			if(canJump) {
 				jumping = true;
 			}
+		}
+
+		if(paused && pressingJumpButton) {
+			paused = false;
 		}
 
 		if (jumping) {
@@ -59,21 +67,37 @@ public class Player : MonoBehaviour {
 			}
 		}
 
-		if(canWallJump && pressingJumpButton) {
-			canWallJump = false;
+		if(canWallJump) {
+			speed = 0;
 
-			speed = wallJumpLeft ? -horizontalWallJumpingSpeed : horizontalWallJumpingSpeed;
-			
-			GetComponent<Rigidbody>().velocity = new Vector3(
-				GetComponent<Rigidbody>().velocity.x,
-				verticalWallJumpingSpeed,
-				GetComponent<Rigidbody>().velocity.z
-			);
+			if(pressingJumpButton) {
+				canWallJump = false;
+
+				speed = wallJumpLeft ? -horizontalWallJumpingSpeed : horizontalWallJumpingSpeed;
+				
+				GetComponent<Rigidbody>().velocity = new Vector3(
+					GetComponent<Rigidbody>().velocity.x,
+					verticalWallJumpingSpeed,
+					GetComponent<Rigidbody>().velocity.z
+				);
+			}
 		}
 
 
+		}
+
+		public void Pause () {
+			paused = true;
 		}
 		
+
+	void OnTriggerEnter(Collider otherCollider) {
+		if(otherCollider.transform.GetComponent<Coin>() != null) {
+			Destroy(otherCollider.gameObject);
+			onCollectCoin ();
+		}
+	}
+
 	void OnTriggerStay(Collider otherCollider) {
 		if(otherCollider.tag == "JumpingArea") {
 			canJump = true;
@@ -84,7 +108,12 @@ public class Player : MonoBehaviour {
 			wallJumpLeft = transform.position.x < otherCollider.transform.position.x;
 
 		}
-	
+	}
+
+	void OnTriggerExit(Collider otherCollider){
+		if (otherCollider.tag == "WallJumpingArea") {
+			canWallJump = false;
+		}
 	}
 }
 
